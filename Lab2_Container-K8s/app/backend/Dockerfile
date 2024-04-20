@@ -1,15 +1,15 @@
-FROM docker.io/library/node:21-alpine3.18
+FROM docker.io/library/node:20-alpine
 
-EXPOSE 8888
+EXPOSE 5273
+
+RUN mkdir /app
 
 WORKDIR /app
 
-COPY . .
-
-RUN cp .env.sample .env
+COPY . /app
 
 RUN npm install
 
 RUN npm run build
 
-CMD ["npm", "run", "start"]
+CMD ["npm", "run", "dev"]

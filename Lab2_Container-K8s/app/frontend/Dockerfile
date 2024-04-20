@@ -1,11 +1,13 @@
-FROM docker.io/library/node:21-alpine3.18
+FROM docker.io/library/node:20-alpine
 
 EXPOSE 5173
 
+RUN mkdir /app
+
 WORKDIR /app
 
-COPY . .
+COPY . /app
 
 RUN npm install
 
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "start"]

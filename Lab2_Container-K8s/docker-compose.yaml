@@ -1,0 +1,38 @@
+version: "3"
+
+networks:
+  webnet:
+
+services:
+  db:
+    image: mongo
+    restart: always
+    container_name: db
+    networks:
+      - webnet
+    ports:
+      - "27017:27017"
+
+  backend:
+    build:
+      context: ./app/backend
+    restart: always
+    container_name: backend
+    networks:
+      - webnet
+    ports:
+      - "5273:5273"
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./app/frontend
+    restart: always
+    container_name: frontend
+    networks:
+      - webnet
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
