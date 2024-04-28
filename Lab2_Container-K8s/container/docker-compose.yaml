@@ -3,30 +3,25 @@ version: "3"
 services:
   db:
     image: mongo
-    restart: always
-    container_name: db
-    network_mode: "host"
     ports:
       - "27017:27017"
 
   backend:
     build:
       context: ../app/backend
-    restart: always
-    container_name: backend
-    network_mode: "host"
     ports:
-      - "5273:5273"
+      - "8888:8888"
+    environment:
+      DB_HOST: db
     depends_on:
       - db
 
   frontend:
     build:
       context: ../app/frontend
-    restart: always
-    container_name: frontend
-    network_mode: "host"
     ports:
       - "5173:5173"
+    environment:
+      BACKEND_HOST: backend
     depends_on:
       - backend

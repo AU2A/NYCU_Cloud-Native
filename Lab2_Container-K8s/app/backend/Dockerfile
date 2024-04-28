@@ -9,7 +9,7 @@ RUN npm run build
 
 FROM docker.io/library/node:20-alpine AS production
 
-EXPOSE 5273
+EXPOSE 8888
 
 WORKDIR /app
 

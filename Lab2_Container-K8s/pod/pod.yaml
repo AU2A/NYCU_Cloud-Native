@@ -12,7 +12,7 @@ spec:
     - name: backend
       image: ghcr.io/au2a/nycu_cloud-native-lab2-backend:latest
       ports:
-        - containerPort: 5273
+        - containerPort: 8888
       env:
         - name: DB_HOST
           value: 127.0.0.1
