@@ -1,9 +1,15 @@
 # NYCU_Cloud-Native
 
-## Lab1 Testing
+This project is about the "Cloud Native Development: towards Best Practice" course in the spring semester of 2024 at NYCU.
+
+## Lab1 DoCentre
+
+https://github.com/DoCentre
+
+## Lab2 Testing
 
 https://github.com/yubinTW/testing-lab
 
-## Lab2 Container and K8s
+## Lab3 Container and K8s
 
 https://github.com/linroex/Cloud-Native-NYCU-2024
