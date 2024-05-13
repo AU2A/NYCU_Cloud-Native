@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: ghcr.io/au2a/nycu_cloud-native-lab2-frontend:latest
+          image: ghcr.io/au2a/nycu_cloud-native-lab3-frontend:latest
           ports:
             - containerPort: 5173
           livenessProbe:
@@ -51,7 +51,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: ghcr.io/au2a/nycu_cloud-native-lab2-backend:latest
+          image: ghcr.io/au2a/nycu_cloud-native-lab3-backend:latest
           ports:
             - containerPort: 8888
           livenessProbe:
