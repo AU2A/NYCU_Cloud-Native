@@ -1,0 +1,44 @@
+name: CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  Deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to GitHub Container Registry
+        run: echo "${{ secrets.TOKEN_FOR_DOCKER }}" | docker login ghcr.io -u au2a --password-stdin
+
+      - name: Build and push frontend image
+        working-directory: ./frontend
+        run: |-
+          docker build -t ghcr.io/au2a/nycu_cloud-native-lab3-frontend .
+          docker push ghcr.io/au2a/nycu_cloud-native-lab3-frontend
+
+      - name: Build and push backend image
+        working-directory: ./backend
+        run: |-
+          docker build -t ghcr.io/au2a/nycu_cloud-native-lab3-backend .
+          docker push ghcr.io/au2a/nycu_cloud-native-lab3-backend
+
+      - name: Load kubeconfig
+        run: |-
+          mkdir ~/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 --decode >> ~/.kube/config
+
+      - name: Stop old k8s
+        working-directory: ./k8s
+        run: |-
+          kubectl delete -f .
+
+      - name: Start k8s
+        if: always()
+        working-directory: ./k8s
+        run: |-
+          kubectl apply -f .

@@ -1,0 +1,116 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: ghcr.io/au2a/nycu_cloud-native-lab3-frontend:latest
+          ports:
+            - containerPort: 5173
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 5173
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 10m
+              memory: 10Mi
+            limits:
+              cpu: 1000m
+              memory: 1000Mi
+          env:
+            - name: BACKEND_HOST
+              value: backend-clusterip
+          
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: ghcr.io/au2a/nycu_cloud-native-lab3-backend:latest
+          ports:
+            - containerPort: 8888
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8888
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 10m
+              memory: 10Mi
+            limits:
+              cpu: 1000m
+              memory: 1000Mi
+          env:
+            - name: DB_HOST
+              value: db-clusterip
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      containers:
+        - name: db
+          image: mongo
+          ports:
+            - containerPort: 27017
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 27017
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          volumeMounts:
+            - name: mongodb-persistent-storage
+              mountPath: /data/db
+      volumes:
+        - name: mongodb-persistent-storage
+          persistentVolumeClaim:
+            claimName: mongodb-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongodb-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

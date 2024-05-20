@@ -13,3 +13,7 @@ https://github.com/yubinTW/testing-lab
 ## Lab3 Container and K8s
 
 https://github.com/linroex/Cloud-Native-NYCU-2024
+
+## Lab4 Github Action
+
+https://github.com/linroex/Cloud-Native-NYCU-2024

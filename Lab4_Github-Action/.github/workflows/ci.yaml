@@ -1,0 +1,122 @@
+name: CI
+
+on: push
+
+jobs:
+  Unit-Testing:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      - name: Backend - Install
+        working-directory: ./backend
+        run: |
+          npm install
+
+      - name: Backend - Testing
+        working-directory: ./backend
+        run: |
+          npx vitest --coverage.enabled true
+
+      - name: Backend - Coverage Report
+        if: always()
+        uses: davelosert/vitest-coverage-report-action@v2
+        with:
+          working-directory: ./backend
+          github-token: ${{ secrets.TOKEN_GITHUB }}
+
+      - name: Frontend - Install, Testing and Coverage
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: ./frontend
+          build: npm run build
+          start: npm run start
+          wait-on: "http://localhost:5173"
+
+  Check-Formatting:
+    needs: Unit-Testing
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      - name: Backend - Get changed files
+        id: backend-changed-files
+        uses: tj-actions/changed-files@v44
+        with:
+          files: |
+            backend/**/*.ts
+
+      - name: Backend - List all changed files and check if they are formatted
+        id: backend-is-formatted
+        env:
+          ALL_CHANGED_FILES: ${{ steps.backend-changed-files.outputs.all_changed_files }}
+          CHECK_FORMAT: true
+        run: |
+          for file in ${ALL_CHANGED_FILES}; do
+            npx prettier --check $file
+            exit_code=$?
+            if [ $exit_code -ne 0 ]; then
+              echo "File $file is not formatted"
+              CHECK_FORMAT=false
+            fi
+          done
+        continue-on-error: true
+
+      - name: Backend - Format changed files
+        if: steps.backend-is-formatted.outcome != 'success'
+        env:
+          ALL_CHANGED_FILES: ${{ steps.backend-changed-files.outputs.all_changed_files }}
+        run: |
+          for file in ${ALL_CHANGED_FILES}; do
+            npx prettier --write $file
+          done
+
+      - name: Frontend - Get changed files
+        id: frontend-changed-files
+        uses: tj-actions/changed-files@v44
+        with:
+          files: |
+            frontend/**/*.ts
+
+      - name: Frontend - List all changed files and check if they are formatted
+        id: frontend-is-formatted
+        env:
+          ALL_CHANGED_FILES: ${{ steps.frontend-changed-files.outputs.all_changed_files }}
+          CHECK_FORMAT: true
+        run: |
+          for file in ${ALL_CHANGED_FILES}; do
+            npx prettier --check $file
+            exit_code=$?
+            if [ $exit_code -ne 0 ]; then
+              echo "File $file is not formatted"
+              CHECK_FORMAT=false
+            fi
+          done
+        continue-on-error: true
+
+      - name: Frontend - Format changed files
+        if: steps.frontend-is-formatted.outcome != 'success'
+        env:
+          ALL_CHANGED_FILES: ${{ steps.frontend-changed-files.outputs.all_changed_files }}
+        run: |
+          for file in ${ALL_CHANGED_FILES}; do
+            npx prettier --write $file
+          done
+
+      - name: Commit formatted files
+        if: steps.backend-is-formatted.outcome != 'success' || steps.frontend-is-formatted.outcome != 'success'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "[AUTO] Format javascript files"
