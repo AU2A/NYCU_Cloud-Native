@@ -2,7 +2,7 @@
 
 This project is about the "Cloud Native Development: towards Best Practice" course in the spring semester of 2024 at NYCU.
 
-## Lab1 DoCentre
+## Lab1&5 DoCentre
 
 https://github.com/DoCentre
 
